@@ -1,6 +1,9 @@
 package ru.netology.web.data;
 
+import com.github.javafaker.Faker;
 import lombok.Value;
+
+import java.util.Locale;
 
 public class DataHelper {
     private DataHelper() {
@@ -16,8 +19,18 @@ public class DataHelper {
         return new AuthInfo("vasya", "qwerty123");
     }
 
-    public static AuthInfo getOtherAuthInfo(AuthInfo original) {
-        return new AuthInfo("petya", "123qwerty");
+    public static String generateLogin(String locale) {
+        String login = new Faker(new Locale(locale)).name().username();
+        return login;
+    }
+
+    public static String generatePassword(String locale) {
+        String password = new Faker(new Locale(locale)).internet().password();
+        return password;
+    }
+
+    public static AuthInfo getInvalidAuthInfo(AuthInfo original) {
+        return new AuthInfo(DataHelper.generateLogin("en"), DataHelper.generatePassword("en"));
     }
 
     @Value

@@ -1,7 +1,7 @@
 package ru.netology.web.page;
 
 import com.codeborne.selenide.SelenideElement;
-import ru.netology.web.data.DataHelper;
+import org.openqa.selenium.Keys;
 
 import static com.codeborne.selenide.Selenide.$;
 
@@ -11,32 +11,18 @@ public class RefillPage {
     private SelenideElement refillButton = $("[data-test-id=action-transfer]");
     private SelenideElement cancelButton = $("[data-test-id=action-cancel]");
 
+    private void clearField() {
+        amountField.sendKeys(Keys.CONTROL + "A");
+        amountField.sendKeys(Keys.BACK_SPACE);
+        fromField.sendKeys(Keys.CONTROL + "A");
+        fromField.sendKeys(Keys.BACK_SPACE);
+    }
+
     public DashboardPage refillCard(String amount, String from) {
+        new RefillPage().clearField();
         amountField.setValue(amount);
         fromField.setValue(from);
         refillButton.click();
         return new DashboardPage();
     }
-
-    public DashboardPage refillCardTwo(String amount, DataHelper.Card card) {
-        amountField.setValue(amount);
-        fromField.setValue(card.getNumberOne());
-        refillButton.click();
-        return new DashboardPage();
-    }
-
-
-
-    public DashboardPage clearAccounts(){
-        String cardFirstId = "92df3f1c-a033-48e6-8390-206f6b1f56c0";
-        String cardSecondId = "0f3f5c2a-249e-4c3d-8287-09f7a039391d";
-
-        DashboardPage dashBoard = new DashboardPage();
-        if (dashBoard.getCardBalance(cardFirstId) != dashBoard.getCardBalance(cardSecondId)){
-
-        }
-        return new DashboardPage();
-    }
-
-
 }
