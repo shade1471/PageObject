@@ -46,10 +46,11 @@ public class DataHelper {
     public static class Card {
         private String numberOne;
         private String numberTwo;
+        private String wrongCard;
     }
 
     public static Card getNumberCard(AuthInfo authInfo) {
-        return new Card("5559 0000 0000 0001", "5559 0000 0000 0002");
+        return new Card("5559 0000 0000 0001", "5559 0000 0000 0002", "5559 0000 0000 1111");
     }
 
 }

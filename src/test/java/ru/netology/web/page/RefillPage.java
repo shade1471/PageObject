@@ -10,6 +10,7 @@ public class RefillPage {
     private SelenideElement fromField = $("[data-test-id=from] input");
     private SelenideElement refillButton = $("[data-test-id=action-transfer]");
     private SelenideElement cancelButton = $("[data-test-id=action-cancel]");
+    private SelenideElement errorNotification = $("[data-test-id=error-notification]");
 
     private void clearField() {
         amountField.sendKeys(Keys.CONTROL + "A");
@@ -25,4 +26,13 @@ public class RefillPage {
         refillButton.click();
         return new DashboardPage();
     }
+
+    public void wrongRefillCard(String amount, String from){
+        new RefillPage().clearField();
+        amountField.setValue(amount);
+        fromField.setValue(from);
+        refillButton.click();
+        errorNotification.isDisplayed();
+    }
+
 }

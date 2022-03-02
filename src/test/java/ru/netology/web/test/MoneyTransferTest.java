@@ -89,6 +89,14 @@ public class MoneyTransferTest {
         }
 
         @Test
+        void shouldTransferMoneyBetweenOwnCardsWhenNumberCardWrong() {
+            DashboardPage dashBoard = new DashboardPage();
+            int amount = 5000;
+            var refillPage = dashBoard.increaseBalance(cardTwoId);
+            refillPage.wrongRefillCard(Integer.toString(amount), cardNumber.getWrongCard());
+        }
+
+        @Test
         void shouldTransferMoneyBetweenOwnCardsIfNotEnoughBalanceAtFirstCard() {
             DashboardPage dashBoard = new DashboardPage();
             int amount = 15000;
