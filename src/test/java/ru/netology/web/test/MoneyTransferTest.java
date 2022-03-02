@@ -57,39 +57,49 @@ public class MoneyTransferTest {
         @Test
         void shouldTransferMoneyBetweenOwnCardsFromSecondToFirst() {
             DashboardPage dashBoard = new DashboardPage();
+            //сумма пополнения
+            int amount = 5000;
+            //Первичный баланс 1-ой и 2-ой карты до операции
+            int primaryBalanceOne = dashBoard.getCardBalance(cardOneId);
+            int primaryBalanceTwo = dashBoard.getCardBalance(cardOneId);
             // Выбор первой карты для пополнения
             var refillPage = dashBoard.increaseBalance(cardOneId);
             // Сколько и откуда пополнить
-            refillPage.refillCard("5000", cardNumber.getNumberTwo());
+            refillPage.refillCard(Integer.toString(amount), cardNumber.getNumberTwo());
             // Баланс первой карты после операции
             int balanceActualOne = dashBoard.getCardBalance(cardOneId);
             // Баланс второй карты после операции
             int balanceActualTwo = dashBoard.getCardBalance(cardTwoId);
-            assertEquals(15000, balanceActualOne);
-            assertEquals(5000, balanceActualTwo);
+            assertEquals((primaryBalanceOne + amount), balanceActualOne);
+            assertEquals((primaryBalanceTwo - amount), balanceActualTwo);
         }
 
         @Test
         void shouldTransferMoneyBetweenOwnCardsFromFirstToSecond() {
             DashboardPage dashBoard = new DashboardPage();
+            int amount = 5000;
+            int primaryBalanceOne = dashBoard.getCardBalance(cardOneId);
+            int primaryBalanceTwo = dashBoard.getCardBalance(cardOneId);
             var refillPage = dashBoard.increaseBalance(cardTwoId);
-            refillPage.refillCard("5000", cardNumber.getNumberOne());
+            refillPage.refillCard(Integer.toString(amount), cardNumber.getNumberOne());
             int balanceActualOne = dashBoard.getCardBalance(cardOneId);
             int balanceActualTwo = dashBoard.getCardBalance(cardTwoId);
-            assertEquals(5000, balanceActualOne);
-            assertEquals(15000, balanceActualTwo);
+            assertEquals((primaryBalanceOne - amount), balanceActualOne);
+            assertEquals((primaryBalanceTwo + amount), balanceActualTwo);
         }
 
         @Test
-        void shouldTransferMoneyBetweenOwnCardsIfNotEnoughBalance() {
+        void shouldTransferMoneyBetweenOwnCardsIfNotEnoughBalanceAtFirstCard() {
             DashboardPage dashBoard = new DashboardPage();
-            dashBoard.refresh(cardOneId, cardTwoId, authInfo);
+            int amount = 15000;
+            int primaryBalanceOne = dashBoard.getCardBalance(cardOneId);
+            int primaryBalanceTwo = dashBoard.getCardBalance(cardOneId);
             var refillPage = dashBoard.increaseBalance(cardTwoId);
-            refillPage.refillCard("15000", cardNumber.getNumberOne());
+            refillPage.refillCard(Integer.toString(amount), cardNumber.getNumberOne());
             int balanceActualOne = dashBoard.getCardBalance(cardOneId);
             int balanceActualTwo = dashBoard.getCardBalance(cardTwoId);
-            assertEquals(10000, balanceActualOne);
-            assertEquals(10000, balanceActualTwo);
+            assertEquals(primaryBalanceOne, balanceActualOne);
+            assertEquals(primaryBalanceTwo, balanceActualTwo);
         }
     }
 }
