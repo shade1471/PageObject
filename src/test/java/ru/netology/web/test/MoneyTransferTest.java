@@ -9,14 +9,13 @@ import ru.netology.web.page.LoginPage;
 
 import static com.codeborne.selenide.Selenide.open;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static ru.netology.web.data.DataHelper.getCard;
+import static ru.netology.web.data.DataHelper.getWrongCard;
 
 public class MoneyTransferTest {
-    private String cardOneId = "92df3f1c-a033-48e6-8390-206f6b1f56c0";
-    private String cardTwoId = "0f3f5c2a-249e-4c3d-8287-09f7a039391d";
 
     private DataHelper.AuthInfo authInfo = DataHelper.getAuthInfo();
     private DataHelper.AuthInfo authInfoInvalid = DataHelper.getInvalidAuthInfo(authInfo);
-    private DataHelper.Card cardNumber = DataHelper.getNumberCard(authInfo);
     private DataHelper.VerificationCode verificationCode = DataHelper.getVerificationCodeFor(authInfo);
 
     @Nested
@@ -44,14 +43,28 @@ public class MoneyTransferTest {
     @Nested
     public class TransferMoney {
 
+        public void refresh() {
+            DashboardPage dashBoard = new DashboardPage();
+            int diff = dashBoard.getCardBalance(1) - 10000;
+            if (diff != 0) {
+                if (diff < 0) {
+                    String numberCardTwo = DataHelper.getCard(2).getCardNumber();
+                    dashBoard.increaseBalance(1).refillCard(Integer.toString(Math.abs(diff)), numberCardTwo);
+                } else {
+                    String numberCardOne = DataHelper.getCard(1).getCardNumber();
+                    dashBoard.increaseBalance(2).refillCard(Integer.toString(Math.abs(diff)), numberCardOne);
+                }
+            }
+        }
+
         @BeforeEach
         void setup() {
             open("http://localhost:9999");
             var loginPage = new LoginPage();
             var verificationPage = loginPage.validLogin(authInfo);
-            var dashBoard = verificationPage.validVerify(verificationCode);
+            verificationPage.validVerify(verificationCode);
             // Востановление к первоначальному состоянию системы, когда на картах по 10000 р.
-            dashBoard.refresh(cardOneId, cardTwoId, authInfo);
+            refresh();
         }
 
         @Test
@@ -60,16 +73,16 @@ public class MoneyTransferTest {
             //сумма пополнения
             int amount = 5000;
             //Первичный баланс 1-ой и 2-ой карты до операции
-            int primaryBalanceOne = dashBoard.getCardBalance(cardOneId);
-            int primaryBalanceTwo = dashBoard.getCardBalance(cardOneId);
+            int primaryBalanceOne = dashBoard.getCardBalance(1);
+            int primaryBalanceTwo = dashBoard.getCardBalance(2);
             // Выбор первой карты для пополнения
-            var refillPage = dashBoard.increaseBalance(cardOneId);
+            var refillPage = dashBoard.increaseBalance(1);
             // Сколько и откуда пополнить
-            refillPage.refillCard(Integer.toString(amount), cardNumber.getNumberTwo());
+            refillPage.refillCard(Integer.toString(amount), getCard(2).getCardNumber());
             // Баланс первой карты после операции
-            int balanceActualOne = dashBoard.getCardBalance(cardOneId);
+            int balanceActualOne = dashBoard.getCardBalance(1);
             // Баланс второй карты после операции
-            int balanceActualTwo = dashBoard.getCardBalance(cardTwoId);
+            int balanceActualTwo = dashBoard.getCardBalance(2);
             assertEquals((primaryBalanceOne + amount), balanceActualOne);
             assertEquals((primaryBalanceTwo - amount), balanceActualTwo);
         }
@@ -78,12 +91,12 @@ public class MoneyTransferTest {
         void shouldTransferMoneyBetweenOwnCardsFromFirstToSecond() {
             DashboardPage dashBoard = new DashboardPage();
             int amount = 5000;
-            int primaryBalanceOne = dashBoard.getCardBalance(cardOneId);
-            int primaryBalanceTwo = dashBoard.getCardBalance(cardOneId);
-            var refillPage = dashBoard.increaseBalance(cardTwoId);
-            refillPage.refillCard(Integer.toString(amount), cardNumber.getNumberOne());
-            int balanceActualOne = dashBoard.getCardBalance(cardOneId);
-            int balanceActualTwo = dashBoard.getCardBalance(cardTwoId);
+            int primaryBalanceOne = dashBoard.getCardBalance(1);
+            int primaryBalanceTwo = dashBoard.getCardBalance(2);
+            var refillPage = dashBoard.increaseBalance(2);
+            refillPage.refillCard(Integer.toString(amount), getCard(1).getCardNumber());
+            int balanceActualOne = dashBoard.getCardBalance(1);
+            int balanceActualTwo = dashBoard.getCardBalance(2);
             assertEquals((primaryBalanceOne - amount), balanceActualOne);
             assertEquals((primaryBalanceTwo + amount), balanceActualTwo);
         }
@@ -92,22 +105,17 @@ public class MoneyTransferTest {
         void shouldTransferMoneyBetweenOwnCardsWhenNumberCardWrong() {
             DashboardPage dashBoard = new DashboardPage();
             int amount = 5000;
-            var refillPage = dashBoard.increaseBalance(cardTwoId);
-            refillPage.wrongRefillCard(Integer.toString(amount), cardNumber.getWrongCard());
+            var refillPage = dashBoard.increaseBalance(2);
+            refillPage.refillCard(Integer.toString(amount), getWrongCard().getCardNumber());
         }
 
         @Test
         void shouldTransferMoneyBetweenOwnCardsIfNotEnoughBalanceAtFirstCard() {
             DashboardPage dashBoard = new DashboardPage();
             int amount = 15000;
-            int primaryBalanceOne = dashBoard.getCardBalance(cardOneId);
-            int primaryBalanceTwo = dashBoard.getCardBalance(cardOneId);
-            var refillPage = dashBoard.increaseBalance(cardTwoId);
-            refillPage.refillCard(Integer.toString(amount), cardNumber.getNumberOne());
-            int balanceActualOne = dashBoard.getCardBalance(cardOneId);
-            int balanceActualTwo = dashBoard.getCardBalance(cardTwoId);
-            assertEquals(primaryBalanceOne, balanceActualOne);
-            assertEquals(primaryBalanceTwo, balanceActualTwo);
+            var refillPage = dashBoard.increaseBalance(1);
+            refillPage.wrongRefillCard(Integer.toString(amount), getCard(2).getCardNumber());
+            refillPage.checkErrorBalance();
         }
     }
 }
